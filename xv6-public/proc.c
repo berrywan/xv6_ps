@@ -532,3 +532,34 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+ps()
+{
+        struct proc *p;
+        struct proc *pp;
+        //Enable interrupts on this processor
+        sti();
+
+        //Loop over process table looking for process with pid.
+        acquire(&ptable.lock);
+
+        cprintf("pid \t ppid \t state   \t name \t \n");
+
+                for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+                        if(p == ptable.proc) { pp=p; }
+                                else { pp = p->parent; }
+                        if( p->state == SLEEPING )
+                                cprintf("%d \t %d \t SLEEPING \t %s \n", p->pid, pp->pid,  p->name);
+                        else if ( p->state == RUNNING )
+                              cprintf("%d \t %d \t RUNNING \t %s \n", p->pid, pp->pid, p->name);
+                        else if ( p->state == RUNNABLE )
+                                cprintf("%d \t %d \t RUNNABLE \t %s \n", p->pid, pp->pid, p->name);
+                        else if ( p->state == EMBRYO )
+                                cprintf("%d \t %d \t EMBRYO \t %s \n", p->pid, pp->pid, p->name);
+                        else if ( p->state == ZOMBIE )
+                                cprintf("%d \t %d \t ZOMBIE \t %s \n", p->pid, pp->pid, p->name);
+                }
+
+release(&ptable.lock);
+return 22;
+}
